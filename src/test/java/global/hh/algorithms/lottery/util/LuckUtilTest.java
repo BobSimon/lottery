@@ -1,6 +1,8 @@
 package global.hh.algorithms.lottery.util;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Formatter.BigDecimalLayoutForm;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,8 @@ public class LuckUtilTest {
 	@Test
 	public void choose() {
 		Map<Prize, Integer> countPrize = new HashMap<>();
-		List<Prize> ps = Arrays.asList(new Prize("菠萝", "0.1"), new Prize("芒果", "-2"), new Prize("香蕉", "0.1"),
-				new Prize("苹果", "0.3"), new Prize("草莓", "0.5"));
+		List<Prize> ps = Arrays.asList(new Prize("菠萝", "0.914748364"), new Prize("芒果", "-2"), new Prize("香蕉", "0.914748364"),
+				new Prize("苹果", "0.914748364"), new Prize("草莓", "0.5"));
 		int times = 100;
 		Prize p;
 		for (int i = 0; i < times; i++) {

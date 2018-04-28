@@ -40,9 +40,8 @@ public class LuckUtil {
 			return desc.getT2().get(0);
 		}
 		int maxLength = maxDecimalLength(desc.getT2());
-		BigDecimal den = BigDecimal.TEN.pow(maxLength);
-		List<Tuple2<Integer, Integer>> list = luckToRange(desc.getT2(), den);
-		int length = den.intValue();
+		int length = (int) Math.pow(10, maxLength);
+		List<Tuple2<Integer, Integer>> list = luckToRange(desc.getT2(), length);
 		int num = r.nextInt(length) + 1;
 		for (int j = 0; j < list.size(); j++) {
 			if (num <= list.get(j).getT2()) {
@@ -113,15 +112,20 @@ public class LuckUtil {
 	 *            分母
 	 * @return
 	 */
-	public static <T extends Luck> List<Tuple2<Integer, Integer>> luckToRange(List<T> lucks, BigDecimal den) {
+	public static <T extends Luck> List<Tuple2<Integer, Integer>> luckToRange(List<T> lucks, Integer den) {
 		List<Tuple2<Integer, Integer>> list = new ArrayList<>();
+		int max;
 		for (int i = 0; i < lucks.size(); i++) {
 			if (i == 0) {
-				list.add(new Tuple2<Integer, Integer>(1,
-						new BigDecimal(lucks.get(i).getChance()).multiply(den).intValue()));
+				list.add(Tuples.of(1, BigDecimalUtil.multiply(lucks.get(i).getChance(), den.toString()).intValue()));
 			} else {
-				list.add(new Tuple2<Integer, Integer>(list.get(i - 1).getT2() + 1,
-						list.get(i - 1).getT2() + new BigDecimal(lucks.get(i).getChance()).multiply(den).intValue()));
+				max = list.get(i - 1).getT2()
+						+ BigDecimalUtil.multiply(lucks.get(i).getChance(), den.toString()).intValue();
+				if (max > den) {
+					list.add(Tuples.of(list.get(i - 1).getT2() + 1, den));
+					break;
+				}
+				list.add(Tuples.of(list.get(i - 1).getT2() + 1, max));
 			}
 		}
 		return list;

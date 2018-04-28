@@ -22,5 +22,4 @@ public interface Luck extends Serializable{
 	 */
 	String getChance();
 	
-	
 }
