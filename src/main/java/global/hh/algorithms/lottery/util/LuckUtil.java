@@ -29,23 +29,24 @@ public class LuckUtil {
 		if (null == lucks || lucks.isEmpty()) {
 			return null;
 		}
+		//过滤非法概率
 		Tuple2<Boolean, List<T>> desc = doFilter(lucks);
 		if (null == desc) {
 			return null;
 		}
+		//如果有概率>=1的，直接返回
 		if (desc.getT1()) {
 			return desc.getT2().get(0);
 		}
 		int maxLength = maxDecimalLength(desc.getT2());
+		//分母
 		int length = (int) Math.pow(10, maxLength);
-		List<Tuple2<Integer, Integer>> list = luckToRange(desc.getT2(), length);
-		int num = ThreadLocalRandom.current().nextInt(1,length + 1);
-		for (int j = 0; j < list.size(); j++) {
-			if (num <= list.get(j).getT2()) {
-				return desc.getT2().get(j);
-			}
-		}
-		return null;
+		//分段
+		List<Tuple2<T, Integer>> list = luckToRange(desc.getT2(), length);
+		//随机数
+		int num = ThreadLocalRandom.current().nextInt(1, length + 1);
+		//抽
+		return list.stream().filter(item -> num <= item.getT2()).map(Tuple2::getT1).findFirst().orElse(null);
 	}
 
 	/**
@@ -85,16 +86,9 @@ public class LuckUtil {
 	 * @return
 	 */
 	public static <T extends Luck> int maxDecimalLength(List<T> lucks) {
-		int maxLength = 1;
-		for (Luck luck : lucks) {
-			String s = luck.getChance().split("\\.")[1];
-			int sl = s.length();
-			if (sl > MAX_DECIMAL_LENGTH) {
-				throw new MaxDecimalLengthException("The length of the decimal  are more than " + MAX_DECIMAL_LENGTH);
-			}
-			if (sl > maxLength) {
-				maxLength = sl;
-			}
+		int maxLength = lucks.stream().map(i -> i.getChance().split("\\.")[1]).mapToInt(String::length).max().orElse(1);
+		if (maxLength > MAX_DECIMAL_LENGTH) {
+			throw new MaxDecimalLengthException("The length of the decimal  are more than " + MAX_DECIMAL_LENGTH);
 		}
 		return maxLength;
 	}
@@ -109,22 +103,24 @@ public class LuckUtil {
 	 *            分母
 	 * @return
 	 */
-	public static <T extends Luck> List<Tuple2<Integer, Integer>> luckToRange(List<T> lucks, Integer den) {
-		List<Tuple2<Integer, Integer>> list = new ArrayList<>();
+	public static <T extends Luck> List<Tuple2<T, Integer>> luckToRange(List<T> lucks, Integer den) {
+		List<Tuple2<T, Integer>> list = new ArrayList<>();
 		int max;
 		for (int i = 0; i < lucks.size(); i++) {
 			if (i == 0) {
-				list.add(Tuples.of(1, BigDecimalUtil.multiply(lucks.get(i).getChance(), den.toString()).intValue()));
+				list.add(Tuples.of(lucks.get(i),
+						BigDecimalUtil.multiply(lucks.get(i).getChance(), den.toString()).intValue()));
 			} else {
 				max = list.get(i - 1).getT2()
 						+ BigDecimalUtil.multiply(lucks.get(i).getChance(), den.toString()).intValue();
 				if (max > den) {
-					list.add(Tuples.of(list.get(i - 1).getT2() + 1, den));
+					list.add(Tuples.of(lucks.get(i), den));
 					break;
 				}
-				list.add(Tuples.of(list.get(i - 1).getT2() + 1, max));
+				list.add(Tuples.of(lucks.get(i), max));
 			}
 		}
 		return list;
+
 	}
 }
