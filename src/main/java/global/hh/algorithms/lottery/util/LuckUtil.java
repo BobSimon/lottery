@@ -1,11 +1,10 @@
 package global.hh.algorithms.lottery.util;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import global.hh.algorithms.lottery.Luck;
 import global.hh.algorithms.lottery.exception.MaxDecimalLengthException;
@@ -21,8 +20,6 @@ import global.hh.algorithms.lottery.util.tuple.Tuples;
  * @date 2018年3月13日下午4:45:18
  */
 public class LuckUtil {
-	private final static Random r = new Random();
-
 	/**
 	 * 小数点最多位数，因为随机数用int生成，不能超过范围
 	 */
@@ -42,7 +39,7 @@ public class LuckUtil {
 		int maxLength = maxDecimalLength(desc.getT2());
 		int length = (int) Math.pow(10, maxLength);
 		List<Tuple2<Integer, Integer>> list = luckToRange(desc.getT2(), length);
-		int num = r.nextInt(length) + 1;
+		int num = ThreadLocalRandom.current().nextInt(1,length + 1);
 		for (int j = 0; j < list.size(); j++) {
 			if (num <= list.get(j).getT2()) {
 				return desc.getT2().get(j);
